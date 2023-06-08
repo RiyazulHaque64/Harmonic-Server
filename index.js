@@ -37,6 +37,7 @@ async function run() {
 
     // Harmonic db collections
     const usersCollection = client.db("harmonicDB").collection("users");
+    const classesCollection = client.db("harmonicDB").collection("classes");
 
     // Users API
     app.put("/users/:email", async (req, res) => {
@@ -48,6 +49,24 @@ async function run() {
         $set: user,
       };
       const result = await usersCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+    });
+
+    // Classes API
+
+    // My Class
+    app.get("/classes/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = { email: email };
+      const result = await classesCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // Add Class
+    app.post("/classes", async (req, res) => {
+      const classInfo = req.body;
+      const result = await classesCollection.insertOne(classInfo);
       res.send(result);
     });
 
