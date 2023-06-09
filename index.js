@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 // Configure express app
 const app = express();
@@ -38,6 +38,7 @@ async function run() {
     // Harmonic db collections
     const usersCollection = client.db("harmonicDB").collection("users");
     const classesCollection = client.db("harmonicDB").collection("classes");
+    const selectedCollection = client.db("harmonicDB").collection("selected");
 
     // Users API
     app.put("/users/:email", async (req, res) => {
@@ -52,13 +53,16 @@ async function run() {
       res.send(result);
     });
 
-    // Classes API
+    // Get my classes
+    app.get("/classes", async (req, res) => {
+      const result = await classesCollection.find().toArray();
+      res.send(result);
+    });
 
-    // My Class
+    // Get my classes
     app.get("/classes/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
-      const query = { email: email };
+      const query = { instructorEmail: email };
       const result = await classesCollection.find(query).toArray();
       res.send(result);
     });
@@ -67,6 +71,33 @@ async function run() {
     app.post("/classes", async (req, res) => {
       const classInfo = req.body;
       const result = await classesCollection.insertOne(classInfo);
+      res.send(result);
+    });
+
+    // Update Class
+    app.patch("/classes/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const classInfo = req.body;
+      const updateDoc = {
+        $set: classInfo,
+      };
+      const result = await classesCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
+    // Get from selected
+    app.get("/selected/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { studentEmail: email };
+      const result = await selectedCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // Add to selected
+    app.post("/selected", async (req, res) => {
+      const selectedClass = req.body;
+      const result = await selectedCollection.insertOne(selectedClass);
       res.send(result);
     });
 
