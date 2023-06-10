@@ -42,12 +42,15 @@ async function run() {
     const usersCollection = client.db("harmonicDB").collection("users");
     const classesCollection = client.db("harmonicDB").collection("classes");
     const selectedCollection = client.db("harmonicDB").collection("selected");
+    const enrolledClassesCollection = client
+      .db("harmonicDB")
+      .collection("enrolledClasses");
 
     // Generate client secret TODO: add jwt
     app.post("/create-payment-intent", async (req, res) => {
       const price = req.body;
-      if (price) {
-        const amount = parseFloat(price) * 100;
+      if (price.payingAmount) {
+        const amount = parseFloat(price.payingAmount) * 100;
         const paymentIntent = await stripe.paymentIntents.create({
           amount: amount,
           currency: "usd",
@@ -137,6 +140,12 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await selectedCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // Save enrolled class
+    app.post("/enrolledClass", async (req, res) => {
+      const enrolledClass = req.body;
+      console.log(enrolledClass);
     });
 
     // Send a ping to confirm a successful connection
