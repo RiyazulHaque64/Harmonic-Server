@@ -53,9 +53,22 @@ async function run() {
       res.send(result);
     });
 
-    // Get my classes
+    // Get all users
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    // Get all classes
     app.get("/classes", async (req, res) => {
       const result = await classesCollection.find().toArray();
+      res.send(result);
+    });
+
+    // Get approved classes
+    app.get("/classes/approved", async (req, res) => {
+      const query = { status: "approved" };
+      const result = await classesCollection.find(query).toArray();
       res.send(result);
     });
 
