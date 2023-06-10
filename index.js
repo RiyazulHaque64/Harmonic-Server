@@ -9,6 +9,9 @@ const app = express();
 // Port cofigure
 const port = process.env.PORT || 5000;
 
+// stripe
+const stripe = require("stripe")(`${process.env.PAYMENT_SECRET_KEY}`);
+
 // Use middleware
 app.use(express.json());
 app.use(cors());
@@ -45,6 +48,7 @@ async function run() {
       const price = req.body;
       if (price) {
         const amount = parseFloat(price) * 100;
+        const paymentIntent = await stripe.paymentIntents;
       }
     });
 
