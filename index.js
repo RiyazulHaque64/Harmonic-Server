@@ -40,6 +40,14 @@ async function run() {
     const classesCollection = client.db("harmonicDB").collection("classes");
     const selectedCollection = client.db("harmonicDB").collection("selected");
 
+    // Generate client secret TODO: add jwt
+    app.post("/create-payment-intent", async (req, res) => {
+      const price = req.body;
+      if (price) {
+        const amount = parseFloat(price) * 100;
+      }
+    });
+
     // Users API
     app.put("/users/:email", async (req, res) => {
       const email = req.params.email;
