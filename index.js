@@ -145,7 +145,8 @@ async function run() {
     // Save enrolled class
     app.post("/enrolledClass", async (req, res) => {
       const enrolledClass = req.body;
-      console.log(enrolledClass);
+      const result = await enrolledClassesCollection.insertOne(enrolledClass);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
