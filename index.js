@@ -149,6 +149,14 @@ async function run() {
       res.send(result);
     });
 
+    // Get enrolled classes
+    app.get("/enrolledClasses/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { studentEmail: email };
+      const result = await enrolledClassesCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
