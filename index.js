@@ -100,6 +100,24 @@ async function run() {
       res.send(result);
     });
 
+    // Get popular classes
+    app.get("/popularClasses", async (req, res) => {
+      const result = await classesCollection
+        .find()
+        .sort({ enrolledStudent: -1 })
+        .limit(6)
+        .toArray();
+      res.send(result);
+    });
+
+    // Get top instructor
+    app.get("/topInstructor/:role", async (req, res) => {
+      const role = req.params.role;
+      const query = { role: role };
+      const result = await usersCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // Add Class
     app.post("/classes", async (req, res) => {
       const classInfo = req.body;
@@ -157,6 +175,14 @@ async function run() {
         .find(query)
         .sort({ date: -1 })
         .toArray();
+      res.send(result);
+    });
+
+    // Get enrolled class
+    app.get("/enrolledClass/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await classesCollection.findOne(query);
       res.send(result);
     });
 
