@@ -153,7 +153,10 @@ async function run() {
     app.get("/enrolledClasses/:email", async (req, res) => {
       const email = req.params.email;
       const query = { studentEmail: email };
-      const result = await enrolledClassesCollection.find(query).toArray();
+      const result = await enrolledClassesCollection
+        .find(query)
+        .sort({ date: -1 })
+        .toArray();
       res.send(result);
     });
 
