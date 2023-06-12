@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 // Configure express app
@@ -46,6 +47,15 @@ async function run() {
       .db("harmonicDB")
       .collection("enrolledClasses");
 
+    // Generate JWT
+    app.post("/jwt", async (req, res) => {
+      const email = req.body;
+      const token = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res.send({ token });
+    });
+
     // Generate client secret TODO: add jwt
     app.post("/create-payment-intent", async (req, res) => {
       const price = req.body;
@@ -76,6 +86,14 @@ async function run() {
     // Get all users
     app.get("/users", async (req, res) => {
       const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    // Get a user
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
       res.send(result);
     });
 
@@ -111,9 +129,15 @@ async function run() {
     });
 
     // Get top instructor
-    app.get("/topInstructor/:role", async (req, res) => {
-      const role = req.params.role;
-      const query = { role: role };
+    app.get("/topInstructor", async (req, res) => {
+      const query = { role: "instructor" };
+      const result = await usersCollection.find(query).limit(6).toArray();
+      res.send(result);
+    });
+
+    // Get all instructor
+    app.get("/instructor", async (req, res) => {
+      const query = { role: "instructor" };
       const result = await usersCollection.find(query).toArray();
       res.send(result);
     });
