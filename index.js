@@ -34,6 +34,26 @@ const client = new MongoClient(uri, {
   },
 });
 
+// Middleware function for verify jwt token
+function verifyJWT(req, res, next) {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res
+      .status(401)
+      .send({ error: true, message: "Unauthorized access" });
+  }
+  const token = authorization.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res
+        .status(401)
+        .send({ error: true, message: "Unauthorized access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -51,7 +71,7 @@ async function run() {
     app.post("/jwt", async (req, res) => {
       const email = req.body;
       const token = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "7d",
       });
       res.send({ token });
     });
@@ -84,7 +104,7 @@ async function run() {
     });
 
     // Get all users
-    app.get("/users", async (req, res) => {
+    app.get("/users", verifyJWT, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
@@ -98,7 +118,7 @@ async function run() {
     });
 
     // Get all classes
-    app.get("/classes", async (req, res) => {
+    app.get("/classes", verifyJWT, async (req, res) => {
       const result = await classesCollection.find().toArray();
       res.send(result);
     });
@@ -111,8 +131,13 @@ async function run() {
     });
 
     // Get my classes
-    app.get("/classes/:email", async (req, res) => {
+    app.get("/classes/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
+      if (!email || req.decoded.email !== email) {
+        return res
+          .status(403)
+          .send({ error: true, message: "Forbidden access" });
+      }
       const query = { instructorEmail: email };
       const result = await classesCollection.find(query).toArray();
       res.send(result);
@@ -162,8 +187,13 @@ async function run() {
     });
 
     // Get from selected
-    app.get("/selected/:email", async (req, res) => {
+    app.get("/selected/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
+      if (!email || req.decoded.email !== email) {
+        return res
+          .status(403)
+          .send({ error: true, message: "Forbidden access" });
+      }
       const query = { studentEmail: email };
       const result = await selectedCollection.find(query).toArray();
       res.send(result);
@@ -192,8 +222,13 @@ async function run() {
     });
 
     // Get enrolled classes
-    app.get("/enrolledClasses/:email", async (req, res) => {
+    app.get("/enrolledClasses/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
+      if (!email || req.decoded.email !== email) {
+        return res
+          .status(403)
+          .send({ error: true, message: "Forbidden access" });
+      }
       const query = { studentEmail: email };
       const result = await enrolledClassesCollection
         .find(query)
