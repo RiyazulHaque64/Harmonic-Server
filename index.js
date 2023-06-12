@@ -7,15 +7,24 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 // Configure express app
 const app = express();
 
+// cors config
+const corsConfig = {
+  origin: "",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+};
+app.use(cors(corsConfig));
+app.options("", cors(corsConfig));
+app.use(cors());
+
+// Use middleware
+app.use(express.json());
+
 // Port cofigure
 const port = process.env.PORT || 5000;
 
 // stripe
 const stripe = require("stripe")(`${process.env.PAYMENT_SECRET_KEY}`);
-
-// Use middleware
-app.use(express.json());
-app.use(cors());
 
 // Main api
 app.get("/", (req, res) => {
@@ -57,7 +66,7 @@ function verifyJWT(req, res, next) {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     // Harmonic db collections
     const usersCollection = client.db("harmonicDB").collection("users");
@@ -246,7 +255,7 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
